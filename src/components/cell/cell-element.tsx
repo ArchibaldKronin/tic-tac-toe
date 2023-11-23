@@ -13,6 +13,7 @@ export const CellElement = ({ cellParams }: { cellParams: Cell }) => {
 
     const [cellState, setCellState] = useState<CellStateTypes>(cellParams[1]);
 
+
     useEffect(() => {
         setCellState(cellParams[1])
     }, [cellParams[1]])

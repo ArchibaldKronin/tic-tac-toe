@@ -19,4 +19,5 @@ export type Sides = 'cross' | 'zero';
 export interface GameState {
     field: FieldState;
     turn: Sides;
+    isOver: boolean;
 }

@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { CellNames, CellStateTypes, GameState } from "../types/fieldTypes";
 import { RootState } from "./store";
+import { checkGameIsOver } from "../functions/check-game-is-over";
 
 const initialState: GameState = {
     field: {
@@ -15,10 +16,9 @@ const initialState: GameState = {
         "2,2": [[2, 2], CellStateTypes.empty, true],
     },
     turn: "cross",
+    isOver: false,
 }
-// Добавить для каждой ячейки значение activ: boolean, по которой уже проверять, 
-// активна ли ячейка для нажатия (в компоненте cell-element)
-// Сбрасывать при Resete
+
 const gameSlice = createSlice({
     name: 'game',
     initialState,
@@ -28,8 +28,16 @@ const gameSlice = createSlice({
 
             state.field[cellCoordinates][1] = state.turn === "cross" ? CellStateTypes.cross : CellStateTypes.zero;
             state.field[cellCoordinates][2] = false;
+            if (checkGameIsOver(state.field, state.turn)) {
+                for (let cell of Object.entries(state.field)) {
+                    state.field[cell[0] as CellNames][2] = false;
+                }
+                state.isOver = true;
+            }
         },
         changeTurn: (state) => {
+            if (state.isOver) return
+
             if (state.turn === "cross") {
                 state.turn = "zero";
             }
@@ -37,14 +45,16 @@ const gameSlice = createSlice({
                 state.turn = "cross";
             }
         },
-        ResetAllCells: (state) => {
+        resetAllCells: (state) => {
             state.field = initialState.field;
-            state.turn=initialState.turn;
+            state.turn = initialState.turn;
+            state.isOver = false;
         },
     }
 })
 
-export const { ResetAllCells, changeCellState, changeTurn } = gameSlice.actions;
+export const { resetAllCells, changeCellState, changeTurn } = gameSlice.actions;
 export const selectField = (state: RootState) => state.game.field;
 export const selectTurn = (state: RootState) => state.game.turn;
+export const selectIsOver = (state: RootState) => state.game.isOver;
 export default gameSlice.reducer;
